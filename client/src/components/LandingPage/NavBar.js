@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Logo from "./Logo";
+import LeftArrow from "../../utils/LeftArrow";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,17 +22,17 @@ const NavBar = () => {
             className="text-white focus:outline-none flex flex-col items-center"
           >
             <div
-              className={`w-6 h-0.5 bg-white mb-1 transition-transform duration-300 ${
+              className={`w-6 h-0.5 bg-white mb-1 transition-transform duration-100 ${
                 isOpen ? "transform rotate-45 translate-y-2" : ""
               }`}
             ></div>
             <div
-              className={`w-6 h-0.5 bg-white mb-1 transition-opacity duration-300 ${
+              className={`w-6 h-0.5 bg-white mb-1 transition-opacity duration-100 ${
                 isOpen ? "opacity-0" : ""
               }`}
             ></div>
             <div
-              className={`w-6 h-0.5 bg-white transition-transform duration-300 ${
+              className={`w-6 h-0.5 bg-white transition-transform duration-100 ${
                 isOpen ? "transform -rotate-45 -translate-y-2" : ""
               }`}
             ></div>
@@ -61,7 +62,7 @@ const NavBar = () => {
       <motion.div
         className={`fixed top-0 left-0 h-full bg-gray-800 text-white z-50 w-64 transform ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out`}
+        } transition-transform duration-100 ease-in-out`}
         initial={false}
         animate={isOpen ? { x: 0 } : { x: "-100%" }}
       >
@@ -71,9 +72,10 @@ const NavBar = () => {
               onClick={toggleDrawer}
               className="text-white focus:outline-none"
             >
+              {/* <div className="w-6 h-0.5 bg-white mb-1"></div>
               <div className="w-6 h-0.5 bg-white mb-1"></div>
-              <div className="w-6 h-0.5 bg-white mb-1"></div>
-              <div className="w-6 h-0.5 bg-white"></div>
+              <div className="w-6 h-0.5 bg-white"></div> */}
+              <LeftArrow />
             </button>
             <Link
               to="/"
