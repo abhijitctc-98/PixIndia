@@ -4,27 +4,18 @@ import { useNavigate } from "react-router-dom";
 import ShootingStars from "../components/Animations/ShootingStars";
 import CameraClicks from "../components/Animations/CameraClicks";
 import Asteroids from "../components/Animations/Asteroids";
+import UserManagementModal from "../components/modals/UserManagementModal";
+import TaskAssignmentModal from "../components/modals/TaskAssignmentModal";
 
 const AdminHome = () => {
   const [adminName, setAdminName] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  
   const navigate = useNavigate();
-  //const location = useLocation();
-  /*
-  useEffect(() => {
-    const adminUser = location.state?.adminUser;
-    if (!adminUser) {
-      // Redirect to login if no admin user data is present
-      navigate('/admin-login');
-    } else {
-      setAdminName(adminUser.name);
-    }
-  }, [location, navigate]);
-    const handleLogout = () => {
-    // Clear any stored session data here if necessary
-    navigate('/admin-login');
-  };
-*/
+
   useEffect(() => {
     const checkAuth = () => {
       const adminUser = JSON.parse(localStorage.getItem("adminUser"));
@@ -36,10 +27,8 @@ const AdminHome = () => {
     };
 
     checkAuth();
-
     window.addEventListener("popstate", checkAuth);
 
-    // Session Cleanup
     return () => {
       window.removeEventListener("popstate", checkAuth);
     };
@@ -48,6 +37,22 @@ const AdminHome = () => {
   const handleLogout = () => {
     localStorage.removeItem("adminUser");
     navigate("/admin-login", { replace: true });
+  };
+
+  const handleManageUsers = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setShowUserModal(true);
+    }, 1500); // Simulate loading delay
+  };
+
+  const handleAssignTasks = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setShowTaskModal(true);
+    }, 1500); // Simulate loading delay
   };
 
   return (
@@ -85,17 +90,19 @@ const AdminHome = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="bg-gray-800 p-6 rounded-lg shadow-lg"
+            className="bg-gray-800 p-6 rounded-lg shadow-lg cursor-pointer"
+            onClick={handleManageUsers}
           >
             <h2 className="text-2xl font-semibold mb-4">Manage Users</h2>
             <p>Add, edit, or remove user accounts.</p>
           </motion.div>
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="bg-gray-800 p-6 rounded-lg shadow-lg"
+            className="bg-gray-800 p-6 rounded-lg shadow-lg cursor-pointer"
+            onClick={handleAssignTasks}
           >
-            <h2 className="text-2xl font-semibold mb-4">Content Management</h2>
-            <p>Update website content and portfolio.</p>
+            <h2 className="text-2xl font-semibold mb-4">Assign Tasks</h2>
+            <p>Assign tasks to available creators.</p>
           </motion.div>
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -106,6 +113,19 @@ const AdminHome = () => {
           </motion.div>
         </div>
       </motion.div>
+
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+          {/* Add a game-like loading animation here */}
+          <div className="text-white">Loading...</div>
+        </div>
+      )}
+
+      {/* Manage Users Modal */}
+      {showUserModal && <UserManagementModal onClose={() => setShowUserModal(false)} />}
+
+      {/* Assign Tasks Modal */}
+      {showTaskModal && <TaskAssignmentModal onClose={() => setShowTaskModal(false)} />}
     </div>
   );
 };

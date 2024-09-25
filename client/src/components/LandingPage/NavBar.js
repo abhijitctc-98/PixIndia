@@ -122,7 +122,7 @@ const NavBar = () => {
               className="block text-white py-2"
               onClick={toggleDrawer}
             >
-              Dev Login
+              Creator Login
             </Link>
             <Link
               to="/client-login"
