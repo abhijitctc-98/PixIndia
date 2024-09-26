@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { motion, AnimatePresence } from 'framer-motion';
 
 const UserManagementModal = ({ onClose }) => {
   const [users, setUsers] = useState([]);
@@ -11,10 +12,11 @@ const UserManagementModal = ({ onClose }) => {
     mobile: "",
     address: "",
   });
-  const [activeTab, setActiveTab] = useState("view"); // Tab state (view or add)
+  const [activeTab, setActiveTab] = useState("view");
   const [editUserId, setEditUserId] = useState(null);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Simulate API fetch on load
   useEffect(() => {
     const fetchUsers = async () => {
       // TODO: Replace with API call to fetch users
@@ -43,17 +45,54 @@ const UserManagementModal = ({ onClose }) => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    // Clear error message when user starts typing
+    if (Object.values(newUser).some(value => value.trim() !== '')) {
+      setError('');
+    }
+  }, [newUser]);
+
+  const validateForm = () => {
+    if (Object.values(newUser).some(value => value.trim() === '')) {
+      setError('Please fill in all fields');
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(newUser.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    if (newUser.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+    if (isNaN(newUser.age) || parseInt(newUser.age) <= 0) {
+      setError('Please enter a valid age');
+      return false;
+    }
+    if (!/^\+?[1-9]\d{1,14}$/.test(newUser.mobile)) {
+      setError('Please enter a valid mobile number');
+      return false;
+    }
+    return true;
+  };
+
   const handleAddUser = () => {
-    if (newUser.name && newUser.email && newUser.mobile) {
-      setUsers([...users, { id: users.length + 1, ...newUser }]);
-      setNewUser({
-        name: "",
-        email: "",
-        password: "",
-        age: "",
-        mobile: "",
-        address: "",
-      });
+    if (validateForm()) {
+      setIsLoading(true);
+      // Simulate API call
+      setTimeout(() => {
+        setUsers([...users, { id: users.length + 1, ...newUser }]);
+        setNewUser({
+          name: "",
+          email: "",
+          password: "",
+          age: "",
+          mobile: "",
+          address: "",
+        });
+        setIsLoading(false);
+        setActiveTab("view");
+      }, 1000);
     }
   };
 
@@ -62,24 +101,38 @@ const UserManagementModal = ({ onClose }) => {
     setNewUser(user);
     setEditUserId(userId);
     setActiveTab("add");
+    setError('');
   };
 
   const handleUpdateUser = () => {
-    setUsers(users.map((u) => (u.id === editUserId ? newUser : u)));
-    setNewUser({
-      name: "",
-      email: "",
-      password: "",
-      age: "",
-      mobile: "",
-      address: "",
-    });
-    setEditUserId(null);
-    setActiveTab("view");
+    if (validateForm()) {
+      setIsLoading(true);
+      // Simulate API call
+      setTimeout(() => {
+        setUsers(users.map((u) => (u.id === editUserId ? newUser : u)));
+        setNewUser({
+          name: "",
+          email: "",
+          password: "",
+          age: "",
+          mobile: "",
+          address: "",
+        });
+        setEditUserId(null);
+        setActiveTab("view");
+        setIsLoading(false);
+      }, 1000);
+    }
   };
 
   const handleDeleteUser = (userId) => {
     setUsers(users.filter((user) => user.id !== userId));
+  };
+
+  const errorVariants = {
+    initial: { scale: 0.8, opacity: 0 },
+    animate: { scale: 1, opacity: 1 },
+    exit: { scale: 0.8, opacity: 0 },
   };
 
   return (
@@ -115,6 +168,7 @@ const UserManagementModal = ({ onClose }) => {
                 mobile: "",
                 address: "",
               });
+              setError('');
             }}
           >
             Add Creators
@@ -154,8 +208,21 @@ const UserManagementModal = ({ onClose }) => {
             <h3 className="text-xl font-semibold mb-4">
               {editUserId ? "Edit User" : "Add New User"}
             </h3>
+            <AnimatePresence>
+              {error && (
+                <motion.p
+                  variants={errorVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="text-red-400 mb-4 text-center"
+                >
+                  {error}
+                </motion.p>
+              )}
+            </AnimatePresence>
             <input
-              className="w-full mb-2 p-2 bg-gray-700 rounded"
+              className="w-full mb-2 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Name"
               value={newUser.name}
               onChange={(e) =>
@@ -163,7 +230,7 @@ const UserManagementModal = ({ onClose }) => {
               }
             />
             <input
-              className="w-full mb-2 p-2 bg-gray-700 rounded"
+              className="w-full mb-2 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Email"
               value={newUser.email}
               onChange={(e) =>
@@ -171,21 +238,22 @@ const UserManagementModal = ({ onClose }) => {
               }
             />
             <input
-              className="w-full mb-2 p-2 bg-gray-700 rounded"
+              className="w-full mb-2 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Password"
+              type="password"
               value={newUser.password}
               onChange={(e) =>
                 setNewUser({ ...newUser, password: e.target.value })
               }
             />
             <input
-              className="w-full mb-2 p-2 bg-gray-700 rounded"
+              className="w-full mb-2 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Age"
               value={newUser.age}
               onChange={(e) => setNewUser({ ...newUser, age: e.target.value })}
             />
             <input
-              className="w-full mb-2 p-2 bg-gray-700 rounded"
+              className="w-full mb-2 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Mobile"
               value={newUser.mobile}
               onChange={(e) =>
@@ -193,19 +261,29 @@ const UserManagementModal = ({ onClose }) => {
               }
             />
             <input
-              className="w-full mb-2 p-2 bg-gray-700 rounded"
+              className="w-full mb-2 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Address"
               value={newUser.address}
               onChange={(e) =>
                 setNewUser({ ...newUser, address: e.target.value })
               }
             />
-            <button
-              className="bg-blue-500 px-4 py-2 rounded"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full bg-blue-500 text-white py-2 rounded-full font-semibold relative overflow-hidden hover:bg-blue-600 transition duration-300"
               onClick={editUserId ? handleUpdateUser : handleAddUser}
+              disabled={isLoading}
             >
-              {editUserId ? "Update User" : "Add User"}
-            </button>
+              {isLoading ? (
+                <span className="flex justify-center items-center">
+                  <span className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-2"></span>
+                  Loading...
+                </span>
+              ) : (
+                editUserId ? "Update User" : "Add User"
+              )}
+            </motion.button>
           </div>
         )}
       </div>
